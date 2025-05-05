@@ -19,10 +19,12 @@ import {
   Alert
 } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
+import TablePagination from "@mui/material/TablePagination";
+import Pagination from '@mui/material/Pagination';
 import { api } from '../../services/api';
 import { Employee } from '../../types/employee';
 
-// TODO: Pagination 10 pro Seite
+// TODO: Pagination 10 pro Seite https://mui.com/material-ui/react-pagination/
 // TODO: Was sind props in React. Was sind callbacks (im Generellen und in React)
 
 const Employees: React.FC = () => {
@@ -31,13 +33,15 @@ const Employees: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployees();
   }, []);
 
-    // TODO: Create a nice 404 page with react router :)
 
   const fetchEmployees = async () => {
     try {
@@ -53,18 +57,6 @@ const Employees: React.FC = () => {
       setLoading(false);
     }
   };
-
- // TODO: Auslagern UTIL package
-
-
- // TODO: Auslagern in Mapper
-
-
- // TODO: Auslagern in Mapper
-
-
-// TODO: Auslagern UTIL package
-
 
  const handleUUIDClick = (uuid: string) => {
    navigate(`/employees/${uuid}`);
@@ -82,13 +74,16 @@ const EditButton = styled(Button)`
   }
 `;
 
+  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+      setPage(newPage);
+      }
 
- /*
-onClick={() => navigate(`/employees/${employee.uuid}`)}
-style={{cursor: 'pointer'}}
-onMouseEnter={(e) => (e.target as HTMLElement).style.background = 'darkgray'}
-onMouseLeave={(e) => (e.target as HTMLElement).style.background = 'white'}>
- */
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+      }
+
+
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -134,9 +129,8 @@ onMouseLeave={(e) => (e.target as HTMLElement).style.background = 'white'}>
               </TableRow>
             </TableHead>
             <TableBody>
-              {employees.length > 0 ? (
-                employees.map((employee) => (
-                  <TableRow>
+              {employees.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((employee) => (
+                  <TableRow key={employee.uuid}>
                     <TableCell>{Mapper.formatFullName(employee.name)}</TableCell>
                     <TableCell>{employee.department || '-'}</TableCell>
                     <TableCell>{Util.formatDate(employee.birthdate)}</TableCell>
@@ -155,9 +149,10 @@ onMouseLeave={(e) => (e.target as HTMLElement).style.background = 'white'}>
                     </TableCell>
 
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
+                ))}
+
+                 {employees.length === 0 &&(
+                 <TableRow>
                   <TableCell colSpan={7} align="center">
                     No Employees found
                   </TableCell>
@@ -165,6 +160,15 @@ onMouseLeave={(e) => (e.target as HTMLElement).style.background = 'white'}>
               )}
             </TableBody>
           </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 15, 20]}
+          component="div"
+          count={employees.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
         </TableContainer>
       )}
     </Container>
