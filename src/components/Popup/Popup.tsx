@@ -95,8 +95,6 @@ const Popup: React.FC<PopupProps> = ({ isOpen, onClose, title, children}) => {
           {children}
         </StyledCardContent>
           <CardActions>
-            <Button size="small" onClick={onClose}>Cancel</Button>
-            <Button size="small" color="primary">Save</Button>
           </CardActions>
       </StyledCard>
     </Overlay>

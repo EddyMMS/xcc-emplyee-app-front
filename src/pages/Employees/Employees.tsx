@@ -25,9 +25,9 @@ import TablePagination from "@mui/material/TablePagination";
 import Pagination from '@mui/material/Pagination';
 import { api } from '../../services/api';
 import { Employee } from '../../types/employee';
+import NewEmployeeDialog from '../../components/NewEmployeeDialog'
+import { EmployeeGenderEnum, Name } from '../../api/api'
 
-// TODO: Pagination 10 pro Seite https://mui.com/material-ui/react-pagination/
-// TODO: Was sind props in React. Was sind callbacks (im Generellen und in React)
 
 const Employees: React.FC = () => {
 
@@ -43,30 +43,12 @@ const Employees: React.FC = () => {
 // TODO New useState mit boolean "isNewEmployeePopupOpen"
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
 
-// in newEmployeeDialog auslagern
-  const [newEmployee, setNewEmployee] = useState({
-    name: "",
-    department: "",
-    birthdate: "",
-    gender: "",
-    hourlyRate: "",
-    hoursPerWeek: "",
-  });
-
  const openNewEmployeePopup = () => {
     setIsPopupOpen(true);
   };
 
     const closePopup = () => {
       setIsPopupOpen(false);
-      setNewEmployee({
-        name: "",
-        department: "",
-        birthdate: "",
-        gender: "",
-        hourlyRate: "",
-        hoursPerWeek: "",
-      });
     };
 
 
@@ -88,6 +70,11 @@ const Employees: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSave = async () => {
+     closePopup()
+    fetchEmployees()
   };
 
  const handleUUIDClick = (uuid: string) => {
@@ -115,26 +102,6 @@ const EditButton = styled(Button)`
       setPage(0);
       }
 
-
-/*
-Neuen Button hinzufügen "New Employee"
-Grauen, durchsichtigen Hintergrund
-In der Mitte Card-Componente
-Diese Cart hat alle Felder die ich brauche zum anlegen eines neuen Employee2 Buttons / cancel and create
-create button voll vorerst nix machen, opt. zu implementieren
-cancel soll pop-up schließen als auch die freie Fläche drumherum
-
-Note
-Pop-Up als Button
-Props festlegenm
-IsOpen ist ein Prop
-When isOpen false soll nix returned werden
-Pop Up soll Kinder übergeben
-Hauptaufgabe ist der Buttton, danach kommt der schwarze hIntergrund, cancelbutton schließt alles wieder (auch wenn man in die leere klickt)
-*/
-
-// Box mit TextFields in newEmployeeDialog auslagern
-
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -157,70 +124,15 @@ Hauptaufgabe ist der Buttton, danach kommt der schwarze hIntergrund, cancelbutto
                 color="primary">
                 New Employee
                 </Button>
-      <Popup
-        isOpen={isPopupOpen}
-        onClose={closePopup}
-        title="Create a new Employee"
-      >
-
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <TextField
-      id="name-popup-input"
-      label="Name"
-      variant="filled"
-      //value={newEmployee.name}
-      //onChange={(e) => { setNewEmployee({ ...newEmployee, name: e.value }) }}
-      required
-      />
-
-      <TextField
-      id="department-popup-input"
-      label="Department"
-      variant="filled"
-      required
-
-      />
-
-      <TextField
-      id="birthdate-popup-input"
-      label="Birthdate"
-      variant="filled"
-      required
-      />
-
-       <TextField
-       id="gender-popup-input"
-       select
-       label="Gender"
-       variant="filled"
-       required
-       >
-       <MenuItem value="M">Male</MenuItem>
-       <MenuItem value="F">Female</MenuItem>
-       <MenuItem value="D">Diverse</MenuItem>
-       </TextField>
-
-      <TextField
-      id="hourlyRate-popup-input"
-      label="Hourly Rate"
-      variant="filled"
-      required
-      />
-
-      <TextField
-      id="hoursPerWeek-popup-input"
-      label="Hours Per Week"
-      variant="filled"
-      required
-      />
-
-      </Box>
-
-      </Popup>
 
          </Box>
-      </Box>
+       </Box>
 
+       <NewEmployeeDialog
+       isOpen={isPopupOpen}
+       onClose={closePopup}
+       onSave={handleSave}
+       />
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

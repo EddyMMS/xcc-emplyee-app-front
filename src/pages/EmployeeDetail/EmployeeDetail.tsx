@@ -59,6 +59,7 @@ const EmployeeDetails: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         Employee Details
       </Typography>
+      <Box>
       <Typography variant="body1">Name: {employee.name.firstName} {employee.name.lastName}</Typography>
       <Typography variant="body1">Department: {employee.department}</Typography>
       <Typography variant="body1">Birthdate: {employee.birthdate}</Typography>
@@ -66,6 +67,7 @@ const EmployeeDetails: React.FC = () => {
       <Typography variant="body1">Hourly Rate: {employee.hourlyRate}</Typography>
       <Typography variant="body1">Hours per Week: {employee.hoursPerWeek}</Typography>
       <Typography variant="body1">Monthly Salary: {employee.monthlySalary}</Typography>
+      </Box>
     </Container>
   );
 };
