@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Mapper from '../../components/Mapper';
 import Util from '../../components/Util';
+import Popup from '../../components/Popup';
 import styled from 'styled-components';
+import { TextField, MenuItem } from '@mui/material';
 import {
   Container,
   Typography,
@@ -37,6 +39,36 @@ const Employees: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const navigate = useNavigate();
+
+// TODO New useState mit boolean "isNewEmployeePopupOpen"
+  const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
+
+// in newEmployeeDialog auslagern
+  const [newEmployee, setNewEmployee] = useState({
+    name: "",
+    department: "",
+    birthdate: "",
+    gender: "",
+    hourlyRate: "",
+    hoursPerWeek: "",
+  });
+
+ const openNewEmployeePopup = () => {
+    setIsPopupOpen(true);
+  };
+
+    const closePopup = () => {
+      setIsPopupOpen(false);
+      setNewEmployee({
+        name: "",
+        department: "",
+        birthdate: "",
+        gender: "",
+        hourlyRate: "",
+        hoursPerWeek: "",
+      });
+    };
+
 
   useEffect(() => {
     fetchEmployees();
@@ -84,6 +116,24 @@ const EditButton = styled(Button)`
       }
 
 
+/*
+Neuen Button hinzufügen "New Employee"
+Grauen, durchsichtigen Hintergrund
+In der Mitte Card-Componente
+Diese Cart hat alle Felder die ich brauche zum anlegen eines neuen Employee2 Buttons / cancel and create
+create button voll vorerst nix machen, opt. zu implementieren
+cancel soll pop-up schließen als auch die freie Fläche drumherum
+
+Note
+Pop-Up als Button
+Props festlegenm
+IsOpen ist ein Prop
+When isOpen false soll nix returned werden
+Pop Up soll Kinder übergeben
+Hauptaufgabe ist der Buttton, danach kommt der schwarze hIntergrund, cancelbutton schließt alles wieder (auch wenn man in die leere klickt)
+*/
+
+// Box mit TextFields in newEmployeeDialog auslagern
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -91,15 +141,86 @@ const EditButton = styled(Button)`
         <Typography variant="h4" component="h1" gutterBottom>
           Employees
         </Typography>
+        <Box>
         <Button
           variant="contained"
           color="primary"
           onClick={fetchEmployees}
           disabled={loading}
+          sx={{ mr: 2 }}
         >
           Refresh
         </Button>
+                <Button
+                onClick={openNewEmployeePopup}
+                variant="contained"
+                color="primary">
+                New Employee
+                </Button>
+      <Popup
+        isOpen={isPopupOpen}
+        onClose={closePopup}
+        title="Create a new Employee"
+      >
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <TextField
+      id="name-popup-input"
+      label="Name"
+      variant="filled"
+      //value={newEmployee.name}
+      //onChange={(e) => { setNewEmployee({ ...newEmployee, name: e.value }) }}
+      required
+      />
+
+      <TextField
+      id="department-popup-input"
+      label="Department"
+      variant="filled"
+      required
+
+      />
+
+      <TextField
+      id="birthdate-popup-input"
+      label="Birthdate"
+      variant="filled"
+      required
+      />
+
+       <TextField
+       id="gender-popup-input"
+       select
+       label="Gender"
+       variant="filled"
+       required
+       >
+       <MenuItem value="M">Male</MenuItem>
+       <MenuItem value="F">Female</MenuItem>
+       <MenuItem value="D">Diverse</MenuItem>
+       </TextField>
+
+      <TextField
+      id="hourlyRate-popup-input"
+      label="Hourly Rate"
+      variant="filled"
+      required
+      />
+
+      <TextField
+      id="hoursPerWeek-popup-input"
+      label="Hours Per Week"
+      variant="filled"
+      required
+      />
+
       </Box>
+
+      </Popup>
+
+         </Box>
+      </Box>
+
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
