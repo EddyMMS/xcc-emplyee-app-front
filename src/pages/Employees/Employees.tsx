@@ -40,7 +40,6 @@ const Employees: React.FC = () => {
 
   const navigate = useNavigate();
 
-// TODO New useState mit boolean "isNewEmployeePopupOpen"
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
 
  const openNewEmployeePopup = () => {

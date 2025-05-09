@@ -13,22 +13,6 @@ interface NewEmployeeDialogProps {
 
     }
 
-/**
- newEmployee: {
-         name:{
-             firstName: string;
-             middleName: string;
-             lastName: string;
-             };
-         department: string;
-         birthdate: string;
-         gender: string;
-         hourlyRate: string;
-         hoursPerWeek: string;
-         };
-     setNewEmployee: React.Dispatch<React.SetStateAction<any>>;
- */
-
 
  const getEmptyEmployee = (): Employee => ({
      name: {
