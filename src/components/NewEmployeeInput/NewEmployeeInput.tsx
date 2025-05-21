@@ -11,6 +11,7 @@ interface NewEmployeeInputProps {
 const NewEmployeeInput: React.FC<NewEmployeeInputProps> = ({
     newEmployee,
     setNewEmployee
+
 }) => {
     const handleInputChange = (field: string, value: any) => {
         setNewEmployee((prev) => ({
