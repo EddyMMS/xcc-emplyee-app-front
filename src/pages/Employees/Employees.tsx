@@ -4,7 +4,7 @@ import Mapper from '../../components/Mapper';
 import Util from '../../components/Util';
 import Popup from '../../components/Popup';
 import styled from 'styled-components';
-import { TextField, MenuItem } from '@mui/material';
+import { TextField, MenuItem, LinearProgress } from '@mui/material';
 import {
   Container,
   Typography,
@@ -26,14 +26,26 @@ import Pagination from '@mui/material/Pagination';
 import { api } from '../../services/api';
 import { Employee } from '../../types/employee';
 import NewEmployeeDialog from '../../components/NewEmployeeDialog'
+import LoadingBar from '../../components/LoadingBar'
 import { EmployeeGenderEnum, Name } from '../../api/api'
+import { useAppDispatch, useAppSelector } from '../../hooks';
+import { setEmployees, setLoading } from '../../features/employees/employeesSlice';
 
+// Loading Balken klein anzeigen wenn Employee Liste nicht leer - DONE
+// Speichern und auslesen des States aus Browser Local Storage - DONE
+// Bei EmployeeDetails lade Employee mit UUID as Cache, setzte abgeänderten Employee im Cache -> alert hinzufügen
 
 const Employees: React.FC = () => {
 
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+   const dispatch = useAppDispatch();
+   const employees = useAppSelector((state) => state?.employees?.list ?? []);
+
+   // const [employees, setEmployees] = useState<Employee[]>([]);
+   // const [loading, setLoading] = useState<boolean>(true);
+   const [error, setError] = useState<string | null>(null);
+
+const [loadingFromCache, setLoadingFromCache] = useState<boolean>(false);
+const [loadingFromAPI, setLoadingFromAPI] = useState<boolean>(false);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -50,26 +62,69 @@ const Employees: React.FC = () => {
       setIsPopupOpen(false);
     };
 
+useEffect(() => {
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+   fetchEmployees()
 
 
-  const fetchEmployees = async () => {
-    try {
-      setLoading(true);
-      const response = await api.listAllEmployees();
-      const validEmployees = Mapper.validEmployees(response);
-      setEmployees(validEmployees);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching employees:', err);
-      setError('Error loading employees! Try again later.');
-    } finally {
-      setLoading(false);
+  /**
+   const savedState = localStorage.getItem("employeesState");
+
+     if (savedState) {
+       try {
+         setLoadingFromCache(true);
+         setTimeout(() => {
+           setLoadingFromCache(false);
+         }, 800);
+       } catch (error) {
+         console.error("Error checking cache:", error);
+         setLoadingFromCache(false);
+       }
+
+       dispatch(setLoading(false));
+       setLoadingFromAPI(false);
+     } else if (employees.length === 0 && !isLoading) {
+       fetchEmployees();
+       */
+
+}, []);
+
+
+
+
+const fetchEmployees = async () => {
+  try {
+    setLoadingFromAPI(true);
+
+    const response = await api.listAllEmployees();
+    const validEmployees = Mapper.validEmployees(response);
+
+    dispatch(setEmployees(validEmployees));
+    setError(null);
+  } catch (err) {
+    console.error('Error fetching employees:', err);
+
+    const savedState = localStorage.getItem("employeesState");
+    if (savedState) {
+      try {
+        const parsedState = JSON.parse(savedState);
+        if (parsedState.list && parsedState.list.length > 0) {
+          console.log('Using cached data as fallback');
+          setError(null);
+          return;
+        }
+      } catch (cacheError) {
+        console.error('Error parsing cache:', cacheError);
+      }
     }
-  };
+    setError('Error loading employees! Try again later.');
+  } finally {
+    setLoadingFromAPI(false);
+  }
+};
+
+
+
 
   const handleSave = async () => {
      closePopup()
@@ -79,6 +134,11 @@ const Employees: React.FC = () => {
  const handleUUIDClick = (uuid: string) => {
    navigate(`/employees/${uuid}`);
  };
+
+const handleRefresh = () => {
+  setTimeout(() => fetchEmployees(), 10);
+};
+
 
 
 
@@ -96,10 +156,16 @@ const EditButton = styled(Button)`
       setPage(newPage);
       }
 
+  const handleClearCache = () => {
+    localStorage.removeItem('employeesState');
+    fetchEmployees();
+  };
+
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
       setRowsPerPage(parseInt(event.target.value, 10));
       setPage(0);
       }
+
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -109,20 +175,21 @@ const EditButton = styled(Button)`
         </Typography>
         <Box>
         <Button
-          variant="contained"
-          color="primary"
-          onClick={fetchEmployees}
-          disabled={loading}
-          sx={{ mr: 2 }}
-        >
-          Refresh
-        </Button>
-                <Button
-                onClick={openNewEmployeePopup}
-                variant="contained"
-                color="primary">
-                New Employee
-                </Button>
+            variant="contained"
+            color="primary"
+            onClick={handleRefresh}
+            disabled={loadingFromAPI}
+            sx={{ mr: 2 }}
+            >
+            Refresh
+         </Button>
+           <Button
+              onClick={openNewEmployeePopup}
+              variant="contained"
+              color="primary"
+              sx={{ mr: 2 }}>
+              New Employee
+           </Button>
 
          </Box>
        </Box>
@@ -139,11 +206,13 @@ const EditButton = styled(Button)`
         </Alert>
       )}
 
-      {loading ? (
-        <Box display="flex" justifyContent="center" my={4}>
-          <CircularProgress />
-        </Box>
-      ) : (
+    {loadingFromAPI && (
+      <Box sx={{ width: '100%', mb: 2 }}>
+       <LinearProgress />
+      </Box>
+    )}
+
+
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -202,7 +271,7 @@ const EditButton = styled(Button)`
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
         </TableContainer>
-      )}
+
     </Container>
   );
 };
