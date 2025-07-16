@@ -49,7 +49,7 @@ const NewEmployeeDialog: React.FC<NewEmployeeDialogProps> = ({
               console.log("Request Payload:", newEmployee);
 
 
-              const response = await api.employeesPost({
+              const response = await api().employeesPost({
                     name: {
                     firstName: newEmployee.name.firstName,
                     middleName: newEmployee.name.middleName,

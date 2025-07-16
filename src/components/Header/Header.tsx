@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   AppBar,
@@ -16,7 +15,11 @@ import {
   ListItemText
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { redirectToGithub, getGithubOAuthUrl } from '../../services/authService'
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store';
+import { clearToken } from "../../features/auth/authSlice"
 
 interface NavItem {
   text: string;
@@ -27,6 +30,17 @@ const Header: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+
+  const isAuthenticated = useSelector((state: RootState) => !!state.auth.token)
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+      dispatch(clearToken());
+      navigate('/loginpage');
+      }
+
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
@@ -39,9 +53,16 @@ const Header: React.FC = () => {
     setDrawerOpen(open);
   };
 
-  const navItems: NavItem[] = [
-    { text: 'Home', path: '/' },
+
+  const navItems: NavItem[] = isAuthenticated
+  ? [
+      { text: 'Home', path: '/' },
     { text: 'Employees', path: '/employees' },
+    ]
+: [
+    { text: 'Home', path: '/' },
+    { text: 'Login', path: '/loginpage' },
+
   ];
 
   const drawerList = () => (
@@ -69,6 +90,12 @@ const Header: React.FC = () => {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Management App
         </Typography>
+
+    {!isMobile && isAuthenticated && user && (
+        <Typography variant="body1" sx={{ marginRight: 2, color: 'white' }}>
+            Logged in as: {user.username}
+        </Typography>
+        )}
 
         {isMobile ? (
           <>
@@ -101,6 +128,15 @@ const Header: React.FC = () => {
                 {item.text}
               </Button>
             ))}
+            {isAuthenticated && (
+                <Button
+                color="inherit"
+                onClick={handleLogout}
+                sx={{ marginLeft: 2 }}
+                >
+                Logout
+                </Button>
+                )}
           </Box>
         )}
       </Toolbar>

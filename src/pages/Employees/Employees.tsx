@@ -30,18 +30,47 @@ import LoadingBar from '../../components/LoadingBar'
 import { EmployeeGenderEnum, Name } from '../../api/api'
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { setEmployees, setLoading } from '../../features/employees/employeesSlice';
+import { getAllEmployees } from "../../employeeAPI"
 
 // Loading Balken klein anzeigen wenn Employee Liste nicht leer - DONE
 // Speichern und auslesen des States aus Browser Local Storage - DONE
 // Bei EmployeeDetails lade Employee mit UUID as Cache, setzte abgeänderten Employee im Cache -> alert hinzufügen
+
+
+
+        /*
+        ##-- OAuth Flows --##
+
+        1. Baue im UI einen Login Button, welcher dich direkt auf Github weiterleitet zum Authorisieren - DONE
+        Client ID -> Kann ich öffentlich machen
+        Client Secret -> Nur im Backend als Secret, (nicht öffentlich machen)
+
+        2. Bau eine Page auf der Redirect Url,
+         welche den "code" einließt und zum Backend schickt auf {backendUrl}/authlogin/oauth/github/access_token - DONE
+
+
+TODOOO
+        3. Erstellen im Backend einen AuthController,
+         welcher auf /auth/login/oauth/github/access_token hört,
+          den "code" entgegennimmt, und den Code für ein OAuth Token austauscht
+
+        4. Das Frontend kriegt den OAuth Token vom Backened
+        als antwort zurück und speichert das OAuth Token im Redux Store
+
+
+        https://github.com/settings/applications/3045564
+        https://docs.github.com/de/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps
+        https://docs.github.com/de/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps
+         */
+
+
+
 
 const Employees: React.FC = () => {
 
    const dispatch = useAppDispatch();
    const employees = useAppSelector((state) => state?.employees?.list ?? []);
 
-   // const [employees, setEmployees] = useState<Employee[]>([]);
-   // const [loading, setLoading] = useState<boolean>(true);
    const [error, setError] = useState<string | null>(null);
 
 const [loadingFromCache, setLoadingFromCache] = useState<boolean>(false);
@@ -65,38 +94,17 @@ const [loadingFromAPI, setLoadingFromAPI] = useState<boolean>(false);
 useEffect(() => {
 
    fetchEmployees()
-
-
-  /**
-   const savedState = localStorage.getItem("employeesState");
-
-     if (savedState) {
-       try {
-         setLoadingFromCache(true);
-         setTimeout(() => {
-           setLoadingFromCache(false);
-         }, 800);
-       } catch (error) {
-         console.error("Error checking cache:", error);
-         setLoadingFromCache(false);
-       }
-
-       dispatch(setLoading(false));
-       setLoadingFromAPI(false);
-     } else if (employees.length === 0 && !isLoading) {
-       fetchEmployees();
-       */
-
 }, []);
-
-
 
 
 const fetchEmployees = async () => {
   try {
     setLoadingFromAPI(true);
 
-    const response = await api.listAllEmployees();
+    const username = "username123";
+    const password = "password123";
+
+    const response = await getAllEmployees(username, password);
     const validEmployees = Mapper.validEmployees(response);
 
     dispatch(setEmployees(validEmployees));
@@ -123,9 +131,6 @@ const fetchEmployees = async () => {
   }
 };
 
-
-
-
   const handleSave = async () => {
      closePopup()
     fetchEmployees()
@@ -138,8 +143,6 @@ const fetchEmployees = async () => {
 const handleRefresh = () => {
   setTimeout(() => fetchEmployees(), 10);
 };
-
-
 
 
 const EditButton = styled(Button)`
