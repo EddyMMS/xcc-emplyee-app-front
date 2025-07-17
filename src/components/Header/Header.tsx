@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate } from 'react-router-dom';
-import { redirectToGithub, getGithubOAuthUrl } from '../../services/authService'
+import { redirectToGithub, getGithubOAuthUrl } from '../../services/OauthService'
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { clearToken } from "../../features/auth/authSlice"
